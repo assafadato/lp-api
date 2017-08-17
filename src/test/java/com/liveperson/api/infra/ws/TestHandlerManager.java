@@ -1,5 +1,3 @@
-package com.liveperson.api.infra.ws;
-
 /**
  * The MIT License
  * Copyright (c) 2017 LivePerson, Inc.
@@ -22,14 +20,8 @@ package com.liveperson.api.infra.ws;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+package com.liveperson.api.infra.ws;
 
-import com.liveperson.api.infra.ws.HandlerManager;
-import com.liveperson.api.infra.ws.HandlerManagerImpl;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,13 +34,20 @@ public class TestHandlerManager {
     @Test
     public void testRegisterAndUnregister() {
         HandlerManager<String> manager = new HandlerManagerImpl<>();
-        assertTrue(manager.filter().test("hello"));
+        AtomicInteger ai = new AtomicInteger();
+
+        manager.filter().test("hello");
+        assertEquals(0, ai.get());
         Predicate<String> helFilter = manager.register(s -> s.startsWith("hel"), s -> {
+            ai.incrementAndGet();
         });
-        assertFalse(manager.filter().test("hello"));
-        assertTrue(manager.filter().test("world"));
+        manager.filter().test("hello");
+        assertEquals(1, ai.get());
+        manager.filter().test("world");
+        assertEquals(1, ai.get());
         manager.unRegister(helFilter);
-        assertTrue(manager.filter().test("hello"));
+        manager.filter().test("hello");
+        assertEquals(1, ai.get());
     }
 
     @Test
@@ -79,6 +78,6 @@ public class TestHandlerManager {
         manager.filter().test("bel");
         assertEquals(1, ai.get());
         manager.filter().test("hello");
-        assertEquals(1, ai1.get());
+        assertEquals(2, ai1.get());
     }
 }
